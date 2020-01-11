@@ -16,8 +16,6 @@
 "use strict";
 
 $(document).ready(function () {
-  var username;
-  var password;
   var targetUsername;
   var targetRepo;
   var targetOwner;
@@ -58,19 +56,18 @@ $(document).ready(function () {
       }
     },
     beforeSend: function(xhr) {
-      var password = $('#githubPassword').val().trim();
+      var token = $('#githubToken').val().trim();
       loadingSemaphore.acquire();
-      // only add authorization if a password is provided. Adding empty authorization header
+      // only add authorization if a token is provided. Adding empty authorization header
       //fails loading for public repos
-      if(password) {
-        xhr.setRequestHeader('Authorization', makeBasicAuth(targetUsername, password));
+      if(token) {
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
       }
     }
   });
 
   /**
   * username: github username <required>
-  * password: github password (cleartext) <required>
   * mode:
   *       'list':
   *       'copy':
@@ -105,9 +102,9 @@ $(document).ready(function () {
       },
       error: function(response) {
         if(response.status == 404) {
-          alert('Not found! If this is a private repo make sure you provide a password.');
+          alert('Not found! If this is a private repo make sure you provide a token.');
         }
-        
+
         if(typeof callback == 'function'){
           callback(response);
         }
@@ -173,10 +170,6 @@ $(document).ready(function () {
         writeLog('Deletion of label failed for: ' + labelObject.name + ' Error: ' + errorThrown);
       }
     });
-  }
-
-  function makeBasicAuth(username, password) {
-    return "Basic " + Base64.encode(username + ":" + password);
   }
 
   function createNewLabelEntry(label, mode) {
