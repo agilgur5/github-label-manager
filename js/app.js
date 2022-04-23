@@ -73,10 +73,26 @@ $(document).ready(function () {
   *       'copy':
   * callback: as the name suggests...
   */
-  function apiCallListLabels(username, repo, mode, callback){
+  function apiCallListLabels(username, repo, mode, callback) {
+    apiCallListLabelsRecurse(username, repo, mode, 1, callback)
+  }
+
+  function apiCallListLabelsRecurse(username, repo, mode, page, callback) {
+    apiCallListLabelsPage(username, repo, mode, page, function (response) {
+      // error or empty array (no more labels)
+      if (!response || response.status >= 400 || response.length === 0) {
+        callback(response)
+      } else {
+        // recurse
+        apiCallListLabelsRecurse(username, repo, mode, page + 1, callback)
+      }
+    })
+  }
+
+  function apiCallListLabelsPage(username, repo, mode, page, callback) {
     $.ajax({
       type: 'GET',
-      url: 'https://api.github.com/repos/' + username + '/' + repo + '/labels',
+      url: 'https://api.github.com/repos/' + username + '/' + repo + '/labels?page=' + page,
       success: function (response) {
         console.log("success: ");
         console.log(response);
